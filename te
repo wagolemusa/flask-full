@@ -1,0 +1,34 @@
+from flask import Flask 
+from flask_restplus import Api, Resource, fields
+
+app = Flask(__name__)
+api = Api(app)
+
+a_language = api.model('Language', {'language': fields.String('The language.'), 'id' : fields.Integer('ID')})
+
+
+languages = []
+python = {'language': 'Rubby', 'id' : 1}
+
+languages.append(python)
+
+#get methods
+@api.route('/language')
+class Language(Resource):
+
+	@api.marshal_with(a_language, envelope='that_data')
+	def get(self):
+		return languages
+
+	@api.expect(a_language)
+	def post(self):
+		new_lang = api.payload
+		new_lang['id'] = len(languages) + 1
+		languages.append(new_lang)
+		return {'result' : 'Language added'}, 201
+
+
+
+
+if __name__ == '__main__':
+	app.run(debug=True)
